@@ -1,0 +1,6 @@
+{
+  enabled: true,
+
+  // Maximum amount of music discs an album can hold
+  capacity: 8
+}

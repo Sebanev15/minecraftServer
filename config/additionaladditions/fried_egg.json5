@@ -1,0 +1,10 @@
+{
+  enabled: true,
+  food: {
+    // Amount of hunger restored
+    nutrition: 6,
+
+    // Amount of saturation restored
+    saturation: 7.2000003
+  }
+}

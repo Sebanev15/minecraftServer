@@ -1,0 +1,6 @@
+{
+  enabled: true,
+
+  // If true, Y coordinate of the player will be displayed in the HUD (action bar) when the barometer is held.
+  display_elevation_hud: false
+}

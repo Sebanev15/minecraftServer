@@ -1,0 +1,8 @@
+{
+  attack_speed: 1.0,
+  attack_damage: 4.5,
+
+  // Determines the speed of breaking blocks this tool is effective against (e.g. pickaxe -> stone). Look at Minecraft Wiki for vanilla values (mining efficiency, e.g. iron = 6.0).
+  block_break_speed: 8.0,
+  durability: 900
+}

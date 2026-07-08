@@ -1,0 +1,12 @@
+{
+  enabled: true,
+
+  // Maximum amount of water the watering can can hold. One level is equal to one use.
+  max_water_level: 10,
+
+  // Amount of water, in millibuckets, per water level of the watering can. (On Fabric, 81 droplets = 1 millibucket)
+  volume_water_level: 100,
+
+  // Chance (0.0 - 1.0) for the watering can to fertilize (bone meal) the crop when used.
+  fertilize_chance: 0.25
+}

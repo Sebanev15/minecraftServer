@@ -1,0 +1,11 @@
+{
+  enchantability: 17,
+  equip_sound: {
+    sound_event: "minecraft:item.armor.equip_gold"
+  },
+  repair_ingredient: {
+    item: "additionaladditions:rose_gold_ingot"
+  },
+  toughness: 0.0,
+  knockback_resistance: 0.0
+}

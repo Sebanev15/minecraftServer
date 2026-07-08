@@ -1,0 +1,19 @@
+{
+  // This config is used to disable Additional Additions integration from recipe viewers. Note that this is done automatically when the corresponding feature is disabled.
+  // Those properties are intended to be modified if you're changing the recipes for the items. If you want to disable them completely, please do so in their own config.
+  // Note that disabling a feature may not completely hide it from display in the recipe viewers. It is advised that you use your recipe viewers blacklisting / filtering feature to hide them completely, if needed.
+  // This can be done using filtering rules in REI, or the blacklist in JEI. Please search for more information in their documentation.
+  // If you have any questions, please don't hesitate to ask them in the Additional Additions discord server.
+
+  //  If disabled, recipes for usage of Suspicious Dye items will be hidden from recipe viewers, but remain craftable.
+  // If you want to disable the recipes completely - set this to false AND override the according recipe in a datapack with `{}`, remove it with kubejs, or disable the feature completely in its config.
+  suspicious_dyeing: true,
+
+  // If disabled, recipes for Rose Gold Equipment will be hidden from recipe viewers, but remain craftable.
+  // If you want to disable the recipes completely - set this to false AND override the according recipe in a datapack with `{}`, remove it with kubejs, or disable the feature completely in its config.
+  rose_gold: true,
+
+  // If disabled, recipes for crafts of Colored Albums will be hidden from recipe viewers, but remain craftable.
+  // If you want to disable the recipes completely - set this to false AND override the according recipe in a datapack with `{}`, remove it with kubejs, or disable the feature completely in its config.
+  album_dyeing: true
+}

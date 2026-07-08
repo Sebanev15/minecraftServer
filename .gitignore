@@ -1,0 +1,25 @@
+# Carpetas grandes/regenerables por NeoForge al arrancar
+libraries/
+crash-reports/
+logs/
+defaultconfigs/
+
+# Caches y contenido auto-generado por mods (se recrean solos)
+dynamic-data-pack-cache/
+moonlight-global-datapacks/
+patchouli_books/
+usercache.json
+usernamecache.json
+
+# Mods y mundo (van por Release / rclone, no por Git)
+mods/
+world/
+modpack-v1.0.zip
+
+# Instalador de NeoForge (se descarga aparte, no se versiona)
+neoforge-21.1.233-installer.jar
+neoforge-21.1.233-installer.jar.log
+
+# Runtime
+session.lock
+host.lock

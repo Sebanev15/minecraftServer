@@ -1,0 +1,26 @@
+{
+  enabled: true,
+
+  // Determines how much brighter each color will be compared to the base brightness. Some colors are naturally darker than others, so this allows you to tweak the brightness of each color individually.
+  brightness_multipliers: {
+    white: 1.5,
+    orange: 2.0,
+    magenta: 1.5,
+    light_blue: 1.5,
+    yellow: 1.6,
+    lime: 1.5,
+    pink: 2.0,
+    gray: 1.5,
+    light_gray: 1.5,
+    cyan: 1.5,
+    purple: 1.5,
+    blue: 1.5,
+    brown: 3.5,
+    green: 1.5,
+    red: 2.0,
+    black: 1.5
+  },
+
+  // Determines how much brighter the armor glint will be compared to the item brightness.
+  armor_brightness_multiplier: 1.2
+}
