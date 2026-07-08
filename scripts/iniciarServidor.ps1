@@ -69,7 +69,15 @@ if (Test-Path $InstalledMarker) {
 if ($needsDownload) {
     Write-Host "  Modpack desactualizado o no instalado. Descargando $($manifest.version)..." -ForegroundColor Yellow
     $tempZip = Join-Path $env:TEMP "modpack-download.zip"
-    Invoke-WebRequest -Uri $manifest.url -OutFile $tempZip
+    try {
+        Invoke-WebRequest -Uri $manifest.url -OutFile $tempZip -ErrorAction Stop
+    } catch {
+        Write-Host "  ERROR: no se pudo descargar el modpack desde:" -ForegroundColor Red
+        Write-Host "    $($manifest.url)" -ForegroundColor Red
+        Write-Host "  Motivo: $_" -ForegroundColor Red
+        Write-Host "  Verifica que el Release existe en GitHub y que la URL en modpack.manifest.json es correcta." -ForegroundColor Red
+        exit 1
+    }
 
     $actualHash = (Get-FileHash $tempZip -Algorithm SHA256).Hash
     if ($actualHash -ne $manifest.sha256) {

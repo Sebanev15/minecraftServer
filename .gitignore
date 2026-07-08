@@ -15,6 +15,7 @@ usernamecache.json
 mods/
 world/
 modpack-v1.0.zip
+world.zip
 
 # Instalador de NeoForge (se descarga aparte, no se versiona)
 neoforge-21.1.233-installer.jar

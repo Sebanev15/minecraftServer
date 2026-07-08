@@ -13,7 +13,7 @@ $RunScript       = Join-Path $ServerPath "run.bat"
 
 $RconHost        = "127.0.0.1"
 $RconPort        = 25575
-$RconPassword    = "cambiaestaclave123"     # Debe coincidir con server.properties
+$RconPassword    = "pass123"     # Debe coincidir con server.properties
 
 $RcloneRemote    = "mcworld:minecraft-server"
 $RemoteWorldZip  = "$RcloneRemote/world.zip"
