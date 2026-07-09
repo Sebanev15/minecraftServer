@@ -4,7 +4,7 @@ crash-reports/
 logs/
 defaultconfigs/
 essential/
-joutneymap/
+journeymap/
 
 # Caches y contenido auto-generado por mods (se recrean solos)
 dynamic-data-pack-cache/

@@ -1,9 +1,10 @@
 # =====================================================================
 # Config.ps1 - Configuracion compartida por todos los scripts
-# Cada host debe ajustar $ServerPath a su propia ruta local.
+# La ruta del servidor se resuelve automaticamente a partir de la carpeta scripts.
 # =====================================================================
 
-$ServerPath      = "E:\MinecraftServerFinal"
+$ScriptsPath     = $PSScriptRoot
+$ServerPath      = Split-Path -Parent $ScriptsPath
 $WorldFolder     = Join-Path $ServerPath "world"
 $WorldZip        = Join-Path $ServerPath "world.zip"
 $ModsFolder      = Join-Path $ServerPath "mods"
@@ -26,5 +27,5 @@ $LockStaleHours  = 12   # Si un lock es mas viejo que esto, se avisa que podria 
 
 # Direccion fija de conexion via Tailscale MagicDNS (sin depender de servicios externos)
 $TailscaleHostname     = "mcserver"                    # Nombre que toma quien este hosteando
-$TailscaleDomainSuffix = "taild2e858.ts.net"             # Sacalo de 'tailscale status', la parte despues del primer punto
+$TailscaleDomainSuffix = "taild2e858.ts.net"              # Sacalo de 'tailscale status', la parte despues del primer punto
 $OriginalHostname      = $env:COMPUTERNAME              # Nombre a devolver al cerrar

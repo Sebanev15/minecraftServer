@@ -101,9 +101,13 @@ if ($needsDownload) {
 
 # 4. Bajar el mundo mas reciente desde Drive
 Write-Host "`n[4/7] Descargando mundo desde Google Drive..." -ForegroundColor Yellow
-$tempWorldZip = Join-Path $env:TEMP "world-download.zip"
-rclone copy $RemoteWorldZip $env:TEMP --progress
 $downloadedZip = Join-Path $env:TEMP "world.zip"
+rclone deletefile $downloadedZip 2>$null
+rclone copy $RemoteWorldZip $env:TEMP --progress
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "  ERROR: no se pudo descargar world.zip desde Drive." -ForegroundColor Red
+    exit 1
+}
 
 if (-not (Test-Path $downloadedZip)) {
     Write-Host "  ERROR: no se pudo descargar world.zip desde Drive." -ForegroundColor Red
