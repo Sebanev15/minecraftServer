@@ -14,7 +14,7 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 Write-Host "=== Iniciando servidor de Minecraft ===" -ForegroundColor Cyan
 
 # 1. Chequear lock remoto
-Write-Host "`n[1/6] Verificando si hay otro host activo..." -ForegroundColor Yellow
+Write-Host "`n[1/7] Verificando si hay otro host activo..." -ForegroundColor Yellow
 $lockContent = rclone cat $RemoteLockFile 2>$null
 if ($LASTEXITCODE -eq 0 -and $lockContent) {
     $lockData = $lockContent | ConvertFrom-Json
@@ -43,7 +43,7 @@ if ($LASTEXITCODE -eq 0 -and $lockContent) {
 }
 
 # 2. Traer whitelist/ops/bans actualizados
-Write-Host "`n[2/6] Actualizando configuracion desde Git..." -ForegroundColor Yellow
+Write-Host "`n[2/7] Actualizando configuracion desde Git..." -ForegroundColor Yellow
 Push-Location $ServerPath
 git pull origin main
 if ($LASTEXITCODE -ne 0) {
@@ -55,7 +55,7 @@ Pop-Location
 Write-Host "  Configuracion actualizada." -ForegroundColor Green
 
 # 3. Verificar/actualizar modpack
-Write-Host "`n[3/6] Verificando version del modpack..." -ForegroundColor Yellow
+Write-Host "`n[3/7] Verificando version del modpack..." -ForegroundColor Yellow
 $manifest = Get-Content $ManifestPath | ConvertFrom-Json
 
 $needsDownload = $true
@@ -100,7 +100,7 @@ if ($needsDownload) {
 }
 
 # 4. Bajar el mundo mas reciente desde Drive
-Write-Host "`n[4/6] Descargando mundo desde Google Drive..." -ForegroundColor Yellow
+Write-Host "`n[4/7] Descargando mundo desde Google Drive..." -ForegroundColor Yellow
 $tempWorldZip = Join-Path $env:TEMP "world-download.zip"
 rclone copy $RemoteWorldZip $env:TEMP --progress
 $downloadedZip = Join-Path $env:TEMP "world.zip"
@@ -117,7 +117,7 @@ Remove-Item $downloadedZip -Force
 Write-Host "  Mundo actualizado desde Drive." -ForegroundColor Green
 
 # 5. Crear el lock
-Write-Host "`n[5/6] Reservando el servidor a tu nombre..." -ForegroundColor Yellow
+Write-Host "`n[5/7] Reservando el servidor a tu nombre..." -ForegroundColor Yellow
 $lockData = @{
     host      = $env:USERNAME
     pc        = $env:COMPUTERNAME
@@ -130,10 +130,23 @@ rclone copy $localLockPath "$RcloneRemote/" --progress
 Remove-Item $localLockPath -Force
 Write-Host "  Lock creado a nombre de $env:USERNAME." -ForegroundColor Green
 
-# 6. Arrancar el servidor
-Write-Host "`n[6/6] Arrancando el servidor..." -ForegroundColor Yellow
+# 6. Reclamar el nombre fijo de conexion via Tailscale MagicDNS
+Write-Host "`n[6/7] Reclamando direccion de conexion (Tailscale)..." -ForegroundColor Yellow
+try {
+    tailscale set --hostname $TailscaleHostname
+    Start-Sleep -Seconds 2   # dar tiempo a que MagicDNS propague el cambio
+    Write-Host "  Direccion fija: $TailscaleHostname.$TailscaleDomainSuffix" -ForegroundColor Green
+} catch {
+    Write-Host "  ADVERTENCIA: no se pudo renombrar el dispositivo en Tailscale. $_" -ForegroundColor Red
+    Write-Host "  El servidor va a arrancar igual, pero avisa a tus amigos la IP manualmente:" -ForegroundColor Yellow
+    Write-Host "    $(tailscale ip -4)" -ForegroundColor Yellow
+}
+
+# 7. Arrancar el servidor
+Write-Host "`n[7/7] Arrancando el servidor..." -ForegroundColor Yellow
 Start-Process -FilePath $RunScript -WorkingDirectory $ServerPath
 Write-Host "  Servidor iniciandose en una nueva ventana." -ForegroundColor Green
+Write-Host "  Tus amigos se conectan siempre a: $TailscaleHostname.$TailscaleDomainSuffix" -ForegroundColor Cyan
 Write-Host "  Cuando termines de jugar, usa la opcion 'Finalizar servidor' del menu." -ForegroundColor Cyan
 
 Write-Host "`n=== Inicio completo ===" -ForegroundColor Cyan

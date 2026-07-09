@@ -23,3 +23,8 @@ $JavaProcessName = "java"
 $StateFiles      = @("whitelist.json", "ops.json", "banned-players.json", "banned-ips.json")
 $MaxWaitSeconds  = 120
 $LockStaleHours  = 12   # Si un lock es mas viejo que esto, se avisa que podria estar huerfano
+
+# Direccion fija de conexion via Tailscale MagicDNS (sin depender de servicios externos)
+$TailscaleHostname     = "mcserver"                    # Nombre que toma quien este hosteando
+$TailscaleDomainSuffix = "taild2e858.ts.net"             # Sacalo de 'tailscale status', la parte despues del primer punto
+$OriginalHostname      = $env:COMPUTERNAME              # Nombre a devolver al cerrar

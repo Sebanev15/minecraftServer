@@ -16,6 +16,7 @@ function Show-Estado {
         Write-Host "Estado: EN USO" -ForegroundColor Red
         Write-Host "Host actual: $($lockData.host)" -ForegroundColor White
         Write-Host "Desde: $($lockData.timestamp)" -ForegroundColor White
+        Write-Host "Conectate a: $TailscaleHostname.$TailscaleDomainSuffix" -ForegroundColor Cyan
     } else {
         Write-Host "Estado: LIBRE" -ForegroundColor Green
     }
