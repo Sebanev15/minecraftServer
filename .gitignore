@@ -26,3 +26,6 @@ neoforge-21.1.233-installer.jar.log
 # Runtime
 session.lock
 host.lock
+config/worldedit/.archive-unpack/
+*.zip
+libraries.zip
