@@ -1,162 +1,189 @@
 # Minecraft Server Final
 
+Guía de instalación y uso del servidor distribuido. Cualquier integrante del grupo puede seguir estos pasos para convertirse en host, sin necesidad de una máquina encendida las 24 horas.
 
-## Estructura esperada
+## Índice
 
-La carpeta del servidor debe verse asi:
+- [Instalaciones necesarias](#instalaciones-necesarias)
+  - [Repositorio](#repositorio)
+  - [Configuración de rclone](#configuración-de-rclone)
+  - [Tailscale](#tailscale)
+- [Cómo levantar el servidor paso a paso](#cómo-levantar-el-servidor-paso-a-paso)
+- [Cómo cerrar el servidor correctamente](#cómo-cerrar-el-servidor-correctamente)
 
-```text
-MinecraftServerFinal/
-  scripts/
-    config.ps1
-    iniciarServidor.ps1
-    cerrarServidor.ps1
-    serverManager.ps1
-    RconFunctions.ps1
-  world/
-  mods/
-  run.bat
-  server.properties
-  whitelist.json
-  ops.json
-  banned-players.json
-  banned-ips.json
+---
+
+## Instalaciones necesarias
+
+### Repositorio
+
+Lo primero que necesitamos es tener el repositorio de GitHub clonado.
+
+1. Ingresá al directorio donde querés guardar los archivos del servidor.
+2. Hacé clic derecho dentro del directorio y seleccioná **"Abrir en terminal"**.
+
+![Directorio](pictures/directorio.png)
+
+3. Ejecutá el siguiente comando para clonar el repositorio:
+
+```powershell
+git clone https://github.com/Sebanev15/minecraftServer.git
 ```
 
-El detalle importante es que la carpeta scripts debe estar dentro del directorio raiz del servidor. A partir de ahi, config.ps1 calcula automaticamente la ruta raiz del server.
+Esto debería traer la estructura completa del repositorio. Una vez que confirmes que los archivos se descargaron correctamente, hay que descargar 3 archivos adicionales desde la sección de *Releases* del repositorio, a la que se accede haciendo clic en el enlace señalado en la siguiente imagen:
 
-## Que tiene que tener instalado cada host
-
-1. Git.
-2. Java compatible con el modpack.
-3. rclone configurado con acceso al remote usado para el mundo.
-4. Tailscale instalado y con sesion iniciada.
-
-## config.ps1
-
-El archivo scripts/config.ps1 concentra los datos compartidos:
-
-- RCON host, puerto y password.
-- Remote de rclone para el mundo.
-- Nombres de host de Tailscale.
-- Tiempo maximo de espera para cerrar el proceso de Java.
+![Minecraft 1](pictures/serverMinecraft1.png)
 
 
-## Configuracion de rclone
+Dentro del Release vas a encontrar estos 3 archivos `.zip`, y **cada uno va en un lugar distinto**:
+
+![Release](pictures/relese.png)
 
 
-### Que hace rclone en este flujo
+| Archivo | Dónde va | Para qué sirve |
+|---|---|---|
+| `modsServidor.zip` | Descomprimir dentro de la carpeta del repositorio clonado | Mods que corren en el servidor (lógica del mundo, generación de terreno, etc.) |
+| `librariesServidor.zip` | Descomprimir dentro de la carpeta del repositorio clonado | Librerías que el servidor necesita para arrancar |
+| `modsUsuario.zip` | Descomprimir dentro de la carpeta `mods` de **tu propio Minecraft** (`%appdata%\.minecraft\mods`, o la carpeta de mods de tu launcher) | Mods que solo hacen falta del lado del jugador: interfaz, efectos visuales, animaciones. **No van dentro de la carpeta del servidor.** |
 
-El servidor usa rclone para guardar y recuperar el mundo desde una carpeta compartida de Google Drive. La carpeta compartida se llama `minecraft-server` y dentro de esa carpeta viven los archivos sincronizados entre hosts.
+> ℹ️ `modsUsuario.zip` es responsabilidad de cada jugador, no solo de quien hostea. Todos los que se van a conectar necesitan instalar estos mods en su propio cliente de Minecraft, ya sea que hosteen o no, para que el pack coincida con el del servidor.
 
-En los scripts actuales se usan estas rutas:
+Una vez descomprimidos `modsServidor.zip` y `librariesServidor.zip` dentro de la carpeta del repositorio (y `modsUsuario.zip` dentro de tu carpeta personal de mods), el servidor está casi listo. Lo siguiente es configurar **rclone** y **Tailscale**.
 
-- Remote del mundo: `mcworld:minecraft-server/world.zip`
-- Lock del host: `mcworld:minecraft-server/host.lock`
+---
 
-La idea es esta:
+### Configuración de rclone
 
-- `minecraft-server` es la carpeta compartida en Google Drive.
-- `world.zip` es el backup del mundo que se sube y se baja entre maquinas.
-- `host.lock` es el archivo que indica que una maquina esta hosteando en ese momento.
+#### ¿Qué hace rclone en este flujo?
 
-### Como dejarlo listo
+El servidor usa rclone para guardar y recuperar el mundo desde una carpeta compartida de Google Drive. Esa carpeta se llama `minecraft-server`, y dentro viven los archivos sincronizados entre hosts:
 
-1. Instalar rclone.
+| Archivo | Función |
+|---|---|
+| `world.zip` | Backup del mundo, se sube y se baja entre máquinas |
+| `host.lock` | Indica que una máquina está hosteando en ese momento. Si no hay ningún host activo, este archivo no existe |
+
+#### Cómo dejarlo listo
+
+La configuración de rclone tiene 4 partes bien diferenciadas: **instalar**, **crear el remote**, **conectar la carpeta compartida** y **verificar que todo funciona**. Segui los pasos en orden — si te salteás la parte de la carpeta compartida (la más fácil de olvidar), rclone se instala perfecto pero no va a poder ver ni subir el mundo.
+
+##### Parte 1 — Instalar rclone
 
 ```powershell
 winget install Rclone.Rclone
 ```
 
-2. Abrir una consola nueva y comprobar que rclone responde.
+Cerrá la consola y abrí una nueva (necesario para que Windows actualice el PATH), y confirmá que responde:
 
 ```powershell
 rclone version
 ```
 
-Si ese comando falla, no sigas con la configuracion hasta resolver la instalacion.
+> Si este comando falla, no sigas con la configuración hasta resolver la instalación.
 
-3. Ejecutar el asistente interactivo.
+##### Parte 2 — Crear el remote `mcworld`
 
 ```powershell
 rclone config
 ```
 
-4. Crear un remote nuevo.
+Esto abre un asistente interactivo. Respondé así:
 
-En el menu de `rclone config`, elegir la opcion para crear un remote nuevo. El nombre debe ser `mcworld`, porque los scripts ya esperan ese nombre.
+| Pregunta del asistente | Qué responder |
+|---|---|
+| Elegir acción | Crear un remote nuevo |
+| Nombre del remote | `mcworld` (exacto, los scripts esperan este nombre) |
+| Tipo de storage | `drive` (Google Drive) |
+| `client_id` / `client_secret` | Dejar vacío, presionar Enter |
+| Autenticación | Se abre el navegador (o te da un token por consola) — iniciá sesión con la cuenta de Google que van a usar como almacén. Si el navegador no se abre solo, seguí la [documentación oficial de rclone](https://rclone.org/drive/#making-your-own-client-id) |
+| ¿Configurar como Shared Drive? | `n` (no, salvo que específicamente usen Google Workspace) |
+| Opciones avanzadas | Aceptar los valores por defecto |
+| Confirmar configuración | `y` (yes, this is OK) |
 
-5. Elegir el tipo de almacenamiento.
-
-Cuando te pregunte por el tipo de storage, elegi Google Drive. En la lista de opciones normalmente aparece como `drive`.
-
-6. Iniciar sesion en Google.
-
-Durante el asistente te va a pedir autenticacion. Ese paso puede abrir el navegador o pedir un token en la consola, dependiendo del metodo de login. Completa ese paso una vez tengas la carpeta compartida `minecraft-server`.
-
-7. Confirmar opciones avanzadas si el asistente las muestra.
-
-En general, para un uso normal no hace falta tocar nada raro. Si no tenes un motivo concreto, acepta los valores por defecto.
-
-8. Guardar la configuracion.
-
-Cuando el asistente pregunte si queres guardar el remote, confirmalo. Al final debe quedar un remote llamado `mcworld`.
-
-9. Verificar que el remote exista.
+Al terminar, verificá que el remote quedó creado:
 
 ```powershell
 rclone listremotes
 ```
-
 La salida debe incluir `mcworld:`.
 
-10. Verificar que la carpeta compartida exista en Google Drive.
+##### Parte 3 — Conectar la carpeta compartida a tu Drive
+
+Esta parte es la que más se salta, y sin ella rclone no va a poder ver la carpeta `minecraft-server` aunque el remote esté bien configurado. Google Drive no muestra por defecto las carpetas "Compartidas conmigo" a herramientas externas como rclone — hay que agregarlas explícitamente a tu propia unidad:
+
+1. Entrá a [drive.google.com](https://drive.google.com) con la misma cuenta que usaste en la Parte 2.
+2. Ir a **"Compartido conmigo"** (panel izquierdo).
+3. Clic derecho sobre la carpeta `minecraft-server`.
+4. Elegir **"Organizar"** → **"Añadir acceso directo a Drive"** (en inglés: *"Organize"* → *"Add shortcut to Drive"*).
+5. Elegir **"Mi unidad"** como destino → Confirmar.
+
+##### Parte 4 — Verificar que todo funciona
 
 ```powershell
 rclone lsd mcworld:
 ```
+Tiene que aparecer `minecraft-server` en la lista. Si no aparece, volvé a la Parte 3 — es casi siempre eso.
 
-La cuenta conectada a rclone debe ver la carpeta compartida `minecraft-server`. Si no aparece, revisa permisos o la cuenta con la que iniciaste sesion.
+```powershell
+rclone ls mcworld:minecraft-server
+```
+Esto debería devolver un `world.zip`. Si no devuelve nada, el remote está bien conectado pero por algún motivo no ve el contenido — revisá los permisos que te dieron sobre la carpeta (tenés que tener rol de **Editor**, no solo "puede ver").
 
-11. Confirmar que la ruta compartida se puede leer y escribir.
-
-Probalo creando un archivo chico y sincronizandolo dentro de la carpeta compartida:
-
+Como última prueba, confirmá que también podés **escribir** en la carpeta (no solo leer), creando y subiendo un archivo de prueba:
 ```powershell
 Set-Content .\rclone-test.txt "prueba"
 rclone copy .\rclone-test.txt mcworld:minecraft-server\ --progress
 rclone cat mcworld:minecraft-server\rclone-test.txt
 Remove-Item .\rclone-test.txt
+rclone delete mcworld:minecraft-server\rclone-test.txt
 ```
+Si los 4 comandos corren sin error, rclone está listo.
 
-### Prueba minima de rclone
+---
 
-Antes de intentar levantar el server, conviene probar tres cosas:
+### Tailscale
+
+Para poder avanzar con Tailscale, tenés que haber recibido un link de invitación individual para acceder a la red privada. Si todavía no lo tenés, pedímelo y avisame cuando lo hayas abierto.
+
+Una vez que confirme que estás dentro de la red, tenés que desloguearte de Tailscale desde tu dispositivo:
 
 ```powershell
-rclone lsd mcworld:minecraft-server
-rclone copy .\world.zip mcworld:minecraft-server\ --progress
+tailscale logout
 ```
 
-Si alguno de esos comandos falla, el server no va a poder sincronizar bien el mundo ni detectar el lock del host..
-
-## Como levantar el server paso a paso
-
-### Paso 1: abrir una consola en la carpeta scripts
-
-La persona nueva debe abrir PowerShell en la carpeta scripts del server.
-
-### Paso 2: iniciar el menu
-
-Ejecutar:
+Y luego volver a iniciar sesión:
 
 ```powershell
-.\serverManager.ps1
+tailscale login
 ```
-Una vez veamos un menu parecido a este:
+
+Esto debería abrir el navegador y pedirte que inicies sesión nuevamente con tu cuenta. Te va a aparecer una pantalla similar a esta:
+
+![Tailscale](pictures/tailscale2.png)
+
+Ahí tenés que seleccionar la opción **`sebanev17@gmail.com`**. Una vez hecho esto, ya deberías estar conectado a la red y listo para levantar el servidor.
+
+---
+
+## Cómo levantar el servidor paso a paso
+
+### Paso 1: abrir una consola en la carpeta `scripts`
+
+La persona que va a hostear debe abrir PowerShell dentro de la carpeta `scripts` del servidor.
+
+### Paso 2: iniciar el menú
+
+Ejecutá:
+
+```powershell
+.\ServerManager.ps1
+```
+
+Cuando veas un menú parecido a este, significa que `ServerManager.ps1` se ejecutó correctamente:
+
 ```text
 =================================
-Minecraft Server Manager
+ Minecraft Server Manager
 =================================
 1) Iniciar servidor
 2) Finalizar servidor
@@ -165,9 +192,15 @@ Minecraft Server Manager
 5) Salir
 =================================
 ```
-significa que se ejecuto correctamente el `serverManager.ps1`.
-## Como levantar el servidor?
-Para levantar el serivor simplemente debemos de ingresar la opcion 1. Esto hara comprobaciones y terminara abriendo una terminal aparte (esto es normal, significa que esta levantando el servidor)
-## Como cerrar el server correctamente
-Al terminar de jugar, la persona que esta hosteando debe usar la opcion de cerrar servidor ya que esto sirve para subir todos los cambios y dejar todo listo para el proximo host. Si no se hace esto el proximo host no quedara con los ultimos cambios
 
+### Cómo levantar el servidor
+
+Elegí la opción **1**. El script va a hacer una serie de comprobaciones y, al finalizar, va a abrir una terminal aparte — esto es normal, significa que el servidor está arrancando.
+
+---
+
+## Cómo cerrar el servidor correctamente
+
+Al terminar de jugar, la persona que está hosteando **debe** usar la opción **2 (Finalizar servidor)** del menú. Este paso sube todos los cambios y deja todo listo para el próximo host.
+
+> ⚠️ Si no cerrás el servidor con esta opción, el próximo host no va a tener los últimos cambios sincronizados.
