@@ -98,7 +98,7 @@ Esto abre un asistente interactivo. Respondé así:
 | Autenticación | Se abre el navegador (o te da un token por consola) — iniciá sesión con la cuenta de Google que van a usar como almacén. Si el navegador no se abre solo, seguí la [documentación oficial de rclone](https://rclone.org/drive/#making-your-own-client-id) |
 | ¿Configurar como Shared Drive? | `n` (no, salvo que específicamente usen Google Workspace) |
 | Opciones avanzadas | Aceptar los valores por defecto |
-| Permisos | Ingresar opcion `1` |
+| Permisos | Ingresar opcion `1` para poder obtener correctamente la informacion del directorio `minecraft-server` |
 | Confirmar configuración | `y` (yes, this is OK) |
 
 Al terminar, verificá que el remote quedó creado:
